@@ -579,6 +579,10 @@ class BestinRS485 {
             validMsgInfos,
         };
         receivedMessages.push(receivedMsg);
+        
+        if( receivedMessages.length > 500 ) {
+            receivedMessages.shift();
+        }
         return receivedMsg;
     }
 
@@ -702,6 +706,10 @@ class BestinRS485 {
             property: (property ? property : {})
         };
         this.deviceStatusArray.push(deviceStatus);
+
+        if( this.deviceStatusArray.length > 1000 ) {
+            logger.warn(`deviceStatusArray is over ${this.deviceStatusArray.length}`);
+        }
         return deviceStatus;
     }
 
