@@ -242,6 +242,19 @@ class BestinRS485 {
         this.energyConnection = this.createConnection(options.energy, "energy");
         this.controlConnection = this.createConnection(options.control, "control");
 
+        this.reconnecting = () => {
+            if( this.energyConnection.destroyed ) {
+                this.energyConnection = this.createConnection(options.energy, "energy");
+            }
+
+            if( this.controlConnection.destroyed ) {
+                this.controlConnection = this.createConnection(options.control, "control");
+            }
+        }
+
+        setInterval( () => this.reconnecting(), 10000);
+
+
         if (options.server_enable) {
             this.isServerEnabled = true;
 
@@ -252,6 +265,8 @@ class BestinRS485 {
         } else {
             this.isServerEnabled = false;
         }
+
+       
     }
 
     createMqttClient() {
@@ -478,7 +493,7 @@ class BestinRS485 {
             //    this.socket.destroy();
             //}
 
-            let reconnectInterval = 5000;
+            
             this.socket = net.connect({ host: connData.address, port: connData.port });
             this.socket.on("connect", () => {
                 logger.info(`successfully connected to ${serialName} server`);
