@@ -120,7 +120,7 @@ const DEVICE_INFO = [
         parseToProperty: (buf) => {
             let props = [];
             if (buf.slice(2, 4).toString("hex") !== "1491") {
-                for (let i = 0; i < ((buf[5] & 0x0F) === 1 ? 4 : 2); i++) {
+                for (let i = 0; i < ((buf[5] & 0x0F) === 1 ? 4 : 3); i++) {
                     props.push({ device: "light", room: buf[5] & 0x0F, value: { [`power${i + 1}`]: (buf[6] & (1 << i)) ? "ON" : "OFF" } });
                 }
             } else {
