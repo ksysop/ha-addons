@@ -243,11 +243,11 @@ class BestinRS485 {
         this.controlConnection = this.createConnection(options.control, "control");
 
         this.reconnecting = () => {
-            if( this.energyConnection.destroyed ) {
+            if( options.energy.address?.length > 0 && this.energyConnection?.destroyed ) {
                 this.energyConnection = this.createConnection(options.energy, "energy");
             }
 
-            if( this.controlConnection.destroyed ) {
+            if( options.control.address?.length > 0 && this.controlConnection?.destroyed ) {
                 this.controlConnection = this.createConnection(options.control, "control");
             }
         }
