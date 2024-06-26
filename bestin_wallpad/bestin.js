@@ -474,9 +474,9 @@ class BestinRS485 {
 
         } else {
 
-            if (this.socket) {
-                this.socket.destroy();
-            }
+            //if (this.socket) {
+            //    this.socket.destroy();
+            //}
 
             let reconnectInterval = 5000;
             this.socket = net.connect({ host: connData.address, port: connData.port });
@@ -490,16 +490,16 @@ class BestinRS485 {
             });
             this.socket.on("end", () => {
                 logger.info(`disconnected from ${serialName} server`);
-                setTimeout( ()=> this.createConnection(connData, serialName) , reconnectInterval);
+                //setTimeout( ()=> this.createConnection(connData, serialName) , reconnectInterval);
 
             });
             this.socket.on("error", (err) => {
                 logger.error(`${serialName} connection error (${err.message}) occurred`);
-                setTimeout(()=> this.createConnection(connData, serialName), reconnectInterval);
+                //setTimeout(()=> this.createConnection(connData, serialName), reconnectInterval);
             });
             this.socket.on("timeout", () => {
                 logger.error(`${serialName} connection timed out`);
-                setTimeout(()=> this.createConnection(connData, serialName), reconnectInterval);
+                //setTimeout(()=> this.createConnection(connData, serialName), reconnectInterval);
             });
         }
 
