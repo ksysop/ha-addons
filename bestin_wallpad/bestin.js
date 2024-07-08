@@ -365,9 +365,9 @@ class BestinRS485 {
       }
     };
 
-    setInterval(() => this.reconnecting(), 10000);
+    setInterval(() => this.reconnecting(), 5000);
 
-    setInterval(() => this.processCommand(), 125);
+    setInterval(() => this.processCommand(), 150);
 
     if (options.server_enable) {
       this.isServerEnabled = true;
@@ -644,6 +644,7 @@ class BestinRS485 {
         host: connData.address,
         port: connData.port,
       });
+
       this.socket.on("connect", () => {
         logger.info(`successfully connected to ${serialName} server`);
       });
@@ -654,17 +655,14 @@ class BestinRS485 {
       });
       this.socket.on("end", () => {
         logger.info(`disconnected from ${serialName} server`);
-        //setTimeout( ()=> this.createConnection(connData, serialName) , reconnectInterval);
       });
       this.socket.on("error", (err) => {
         logger.error(
           `${serialName} connection error (${err.message}) occurred`
         );
-        //setTimeout(()=> this.createConnection(connData, serialName), reconnectInterval);
       });
       this.socket.on("timeout", () => {
         logger.error(`${serialName} connection timed out`);
-        //setTimeout(()=> this.createConnection(connData, serialName), reconnectInterval);
       });
     }
 
@@ -1235,7 +1233,7 @@ class BestinRS485 {
       const result = this.serverRequestResult(type, response.data);
 
       if (result === "ok") {
-        logger.info("server light status request successful!");
+        //logger.info("server light status request successful!");
 
         type === "v1"
           ? this.parseXmlLightStatus(response.data)
@@ -1518,7 +1516,7 @@ class BestinRS485 {
         logger.warn(`failed to server lighting command. Result: ${result}`);
         return;
       }
-      logger.info("server livinglight command request successful!");
+      //logger.info("server livinglight command request successful!");
 
       const deviceProps = {
         device: stype,
