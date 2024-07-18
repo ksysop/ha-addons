@@ -343,25 +343,39 @@ class BestinRS485 {
     this.mqttPrefix = options.mqtt.prefix;
     this.energyConnection = this.createConnection(options.energy, "energy");
     this.controlConnection = this.createConnection(options.control, "control");
+    this.options = Object.assign(options)
+
+    this.options.energy.recvtime = new Date();
+    this.options.control.recvtime = new Date();
+
     this.ignoreUpdates = [];
     //this.bypass_propertyKey = "";
 
+
     this.reconnecting = () => {
+      //logger.info( `re ${this.energyConnection?.closed} ${this.options.energy.recvtime}`)
+      const nowtime = new Date().getTime();
       if (
         options.energy.address?.trim().length > 0 &&
-        this.energyConnection?.destroyed
+        ( this.energyConnection?.closed || (( nowtime - this.options.energy.recvtime.getTime())/ 1000 ) > 5 )
       ) {
-        this.energyConnection = this.createConnection(options.energy, "energy");
+        logger.info('reconnecting .. energy')
+        this.energyConnection?.end?.();
+        this.energyConnection = this.createConnection(this.options.energy, "energy");
+        this.deviceStatusCache = {}
       }
 
       if (
         options.control.address?.trim().length > 0 &&
-        this.controlConnection?.destroyed
+        (this.controlConnection?.closed || (( nowtime - this.options.control.recvtime.getTime()) / 1000 ) > 5 ) 
       ) {
+        logger.info('reconnecting .. control')
+        this.controlConnection?.end?.();
         this.controlConnection = this.createConnection(
-          options.control,
-          "control"
+          this.options.control,
+          "control",
         );
+        this.deviceStatusCache = {}
       }
     };
 
@@ -505,14 +519,15 @@ class BestinRS485 {
 
   updateMqttClient(device, room, name, value) {
     if (!this.isMqttConnected) {
+      logger.info('updateMqttClient : is not ocnnected ')
       return;
     }
     const topic = `${this.mqttPrefix}/${device}/${room}/${name}/state`;
     logger.debug(`Update MQTT Topic: ${topic}, Value: ${value}`);
 
-    if (typeof value !== "number") {
+    //if (typeof value !== "number") {
       logger.info(`publish to MQTT: ${topic} = ${value}`);
-    }
+    //}
     this.mqttClient.publish(topic, value.toString(), { retain: true });
   }
 
@@ -624,6 +639,7 @@ class BestinRS485 {
       });
 
       this.serial.on("data", (buffer) => {
+        connData.recvtime = new Date();
         this.findAndSplitBuffer(buffer);
       });
       this.serial.on("open", () => {
@@ -651,6 +667,7 @@ class BestinRS485 {
 
       this.socket.on("data", (buffer) => {
         //logger.info(buffer.toString("hex"));
+        connData.recvtime = new Date();
         this.findAndSplitBuffer(buffer);
       });
       this.socket.on("end", () => {
@@ -1047,7 +1064,7 @@ class BestinRS485 {
     return commandBuffer;
   }
 
-  updatePropertyValues(device, room, name, value, force) {
+  updatePropertyValues(device, room, name, value, force = false) {
     const propertyKey = device + room + name;
 
     //FixME hardcoding..
@@ -1055,15 +1072,19 @@ class BestinRS485 {
       logger.info(`bypass : ${this.bypass_propertyKey} ? ${propertyKey}`);
       this.bypass_propertyKey = "";
       return;
-    }
+    }*/
 
-    if (this.bypass_propertyKey !== "")
+   
+
+    const isSamePropertyValue = this.deviceStatusCache[propertyKey] === value;
+
+    /*if( propertyKey.includes('thermostat')) {
       logger.info(
-        `updatePropertyValues ${device}, ${room}, ${name}, ${value}, ${force}`
-      );*/
-    const isSamePropertyValue =
-      !force && this.deviceStatusCache[propertyKey] === value;
-    if (isSamePropertyValue) return;
+        `update value: ${propertyKey}, ${this.deviceStatusCache[propertyKey]}/${value}, ${isSamePropertyValue}, ${force}`
+      );
+    }*/
+
+    if (isSamePropertyValue && !force ) return;
 
     this.deviceStatusCache[propertyKey] = value;
 
