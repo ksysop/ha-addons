@@ -458,7 +458,7 @@ class BestinRS485 {
     if (topics[0] !== this.mqttPrefix) {
       return;
     }
-    logger.info(`mqtt recv. message: ${topic} = ${value}`);
+    logger.debug(`mqtt recv. message: ${topic} = ${value}`);
 
     //if (!this.isServerEnabled || !this.checkSessionFile()) return;
 
@@ -523,10 +523,10 @@ class BestinRS485 {
       return;
     }
     const topic = `${this.mqttPrefix}/${device}/${room}/${name}/state`;
-    logger.debug(`Update MQTT Topic: ${topic}, Value: ${value}`);
+    //logger.debug(`Update MQTT Topic: ${topic}, Value: ${value}`);
 
     //if (typeof value !== "number") {
-      logger.info(`publish to MQTT: ${topic} = ${value}`);
+      logger.debug(`publish to MQTT: ${topic} = ${value}`);
     //}
     this.mqttClient.publish(topic, value.toString(), { retain: true });
   }
@@ -687,21 +687,25 @@ class BestinRS485 {
   }
 
   findAndSplitBuffer(buffer) {
+      
+    //logger.info(`buffer len ${len}/${buffer.length} - ${buffer.toString('hex')}`);
+    //logger.info(`in : ${buffer.length} - ${buffer.toString('hex')}`);
     while (true) {
       //logger.info(`buffer ${buffer.length}`);
-
+      
       if (buffer.length < 3) break;
       if (buffer[0] !== 2) break;
 
-      //logger.info(buffer.toString("hex"));
-      const len = buffer[2];
+      let len = buffer[2];
 
-      //logger.info(`buffer len ${len}/${buffer.length}`);
+      len = len == 0 ? 10 : len
 
       if (len <= 0) break;
-      if (buffer.length < len) break;
+      if (buffer.length < len) len = buffer.length
 
       const sbuff = buffer.slice(0, len);
+
+      //logger.info(`sbuff ${len}: ${sbuff.toString('hex')}`);
 
       /*if (sbuff.toString("hex").includes("02311"))
         logger.info(`handlePacket : ${sbuff.toString("hex")}`);*/
