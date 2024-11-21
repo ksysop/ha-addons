@@ -7,8 +7,8 @@ copy_file() {
     if [ ! -f "$share_dir/$1" ]; then
         mkdir -p "$share_dir"
         mv "/$1" "$share_dir"
-    else
-        mv -f "/$1" "$share_dir"
+    #else
+    #    mv -f "/$1" "$share_dir"
     fi
 }
 
@@ -16,8 +16,8 @@ copy_file_to_srv() {
     if [ ! -f "$srv_dir/$1" ]; then
         mkdir -p "$srv_dir"
         mv "/$1" "$srv_dir"
-    else
-        mv -f "/$1" "$srv_dir"
+    #else
+    #    mv -f "/$1" "$srv_dir"
     fi
 }
 
