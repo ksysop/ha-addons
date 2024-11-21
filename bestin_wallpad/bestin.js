@@ -1,6 +1,7 @@
 /*
  * @description bestin.js
  * @author lunDreame
+ * @modify ksysop
  */
 
 const logger = require("./srv/logger.js");
